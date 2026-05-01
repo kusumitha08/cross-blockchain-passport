@@ -22,8 +22,6 @@
 - [Installation](#installation)
 - [How to Run](#how-to-run)
 - [API Endpoints](#api-endpoints)
-- [Security Properties](#security-properties)
-- [Team Members](#team-members)
 
 ---
 
@@ -285,9 +283,63 @@ GET http://localhost:5000/aadhaar/proof/1111-2222-3333
 ---
 
 ## 🔄 Cross-Blockchain Verification Flow
--Step 1 → Citizen submits passport application
--Step 2 → Middleware contacts Aadhaar Blockchain
--Step 3 → Aadhaar Blockchain returns Hash + Signature only
--Step 4 → Middleware passes proof to Passport Blockchain
--Step 5 → Passport Blockchain verifies ECDSA signature
--Step 6 → APPROVED or REJECTED recorded on Passport Blockchain
+- Step 1 → Citizen submits passport application
+- Step 2 → Middleware contacts Aadhaar Blockchain
+- Step 3 → Aadhaar Blockchain returns Hash + Signature only
+- Step 4 → Middleware passes proof to Passport Blockchain
+- Step 5 → Passport Blockchain verifies ECDSA signature
+- Step 6 → APPROVED or REJECTED recorded on Passport Blockchain
+
+---
+
+## 📊 Sample Test Data
+
+| Name | DOB | Aadhaar ID |
+|---|---|---|
+| Rajesh Kumar | 15-06-1985 | 1111-2222-3333 |
+| Priya Sharma | 22-03-1990 | 2222-3333-4444 |
+| Arun Mehta | 08-11-1978 | 3333-4444-5555 |
+| Divya Nair | 30-07-1995 | 4444-5555-6666 |
+
+---
+
+## 🚀 Future Work
+
+- Zero Knowledge Proofs for enhanced privacy
+- Real Aadhaar UIDAI API integration
+- Multi-node permissioned blockchain deployment
+- Performance benchmarking against existing systems
+- Biometric verification support
+- Hardware Security Module for key management
+
+---
+
+## 👥 Team Members
+
+| Name | Role |
+|---|---|
+| Kusumitha | Developer |
+| Hamsa | Developer |
+| Rishitha | Developer |
+| Vidya | Developer |
+
+**Guide:** Dr. Pradeep R
+**Institution:** Siddaganga Institute of Technology, Tumkuru
+**Department:** Information Science and Engineering
+
+---
+
+## 📚 References
+
+1. Cheng et al. — Secure Cross-Blockchain Interaction Framework — IEEE Access 2024
+2. Gupta et al. — Blockchain-Based Digital Passport Management — SMARTCOMP 2023
+3. Singh and Patel — Blockchain-Based Identity Management — Future Generation Computer Systems 2024
+4. Verma and Rao — Privacy-Preserving Blockchain Authentication Using ZKP — IEEE Access 2024
+5. UIDAI — Aadhaar Authentication Framework — Government of India 2022
+
+---
+
+## 📄 License
+
+This project is for academic research purposes only.
+Siddaganga Institute of Technology — 2026
