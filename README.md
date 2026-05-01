@@ -324,9 +324,9 @@ GET http://localhost:5000/aadhaar/proof/1111-2222-3333
 | Rishitha | Developer |
 | Vidya | Developer |
 
-**Guide:** Dr. Pradeep R
-**Institution:** Siddaganga Institute of Technology, Tumkuru
-**Department:** Information Science and Engineering
+ **Guide:** Dr. Pradeep R
+ **Institution:** Siddaganga Institute of Technology, Tumkuru
+ **Department:** Information Science and Engineering
 
 ---
 
