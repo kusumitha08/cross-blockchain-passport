@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cross-Blockchain Passport Authentication</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #414050, #14092d, #313145);
+      min-height: 100vh;
+      color: #fff;
+    }
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    header h1 { font-size: 2rem; color: #a78bfa; margin-bottom: 8px; }
+    header p  { color: #94a3b8; font-size: 0.9rem; }
+
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 20px auto;
+      flex-wrap: wrap;
+      max-width: 1000px;
+      padding: 0 20px;
+    }
+    .status-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 150px;
+    }
+    .status-card .label { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    .status-card .value { font-size: 1.4rem; font-weight: bold; color: #a78bfa; margin-top: 4px; }
+    .dot {
+      display: inline-block; width: 9px; height: 9px;
+      border-radius: 50%; background: #22c55e; margin-right: 5px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 20px 60px; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab {
+      padding: 10px 20px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;
+    }
+    .tab:hover { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .tab.active { background: #a78bfa; color: #fff; border-color: #a78bfa; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 28px; margin-bottom: 20px;
+    }
+    .card h2 { font-size: 1.05rem; color: #a78bfa; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 5px; }
+    .form-group input {
+      width: 100%; padding: 11px 14px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.07); color: #fff;
+      font-size: 0.92rem; outline: none; transition: border 0.2s;
+    }
+    .form-group input:focus { border-color: #a78bfa; }
+
+    .btn {
+      width: 100%; padding: 13px; border-radius: 8px; border: none;
+      background: linear-gradient(135deg, #a78bfa, #6d28d9);
+      color: #fff; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; margin-top: 8px;
+    }
+    .btn:hover   { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result { margin-top: 20px; padding: 16px 20px; border-radius: 10px; font-size: 0.88rem; display: none; }
+    .result.show    { display: block; }
+    .result.success { background: rgba(34,197,94,0.15);  border: 1px solid #22c55e; }
+    .result.error   { background: rgba(239,68,68,0.15);  border: 1px solid #ef4444; }
+    .result.info    { background: rgba(167,139,250,0.15); border: 1px solid #a78bfa; }
+
+    .result-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 10px; }
+    .result-row {
+      display: flex; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 0.83rem;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row .key { color: #94a3b8; }
+    .result-row .val { color: #fff; font-weight: 500; word-break: break-all; text-align: right; max-width: 65%; }
+
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge.approved { background: rgba(34,197,94,0.2);  color: #22c55e; }
+    .badge.rejected { background: rgba(239,68,68,0.2);  color: #ef4444; }
+
+    .citizen-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .citizen-name { font-weight: 600; color: #e2e8f0; }
+    .citizen-meta { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+    .citizen-id   { font-size: 0.78rem; color: #a78bfa; font-family: monospace; }
+
+    .app-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-left: 3px solid #a78bfa;
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; font-size: 0.84rem;
+    }
+    .app-card .app-title { font-weight: 600; color: #a78bfa; margin-bottom: 8px; }
+    .hash-text { font-family: monospace; font-size: 0.73rem; color: #64748b; word-break: break-all; }
+    .loading { text-align: center; color: #94a3b8; padding: 20px; font-size: 0.88rem; }
+
+    .tx-box {
+      background: rgba(0,0,0,0.3); border-radius: 8px;
+      padding: 10px 14px; margin-top: 10px; font-family: monospace;
+      font-size: 0.75rem; color: #22c55e; word-break: break-all;
+    }
+    .tx-label { font-size: 0.72rem; color: #94a3b8; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🔐 Cross-Blockchain Passport Authentication</h1>
+  <p>Privacy-Preserving Identity Verification using Aadhaar — Siddaganga Institute of Technology</p>
+</header>
+
+<div class="status-bar">
+  <div class="status-card">
+    <div class="label">Middleware</div>
+    <div class="value" id="middlewareStatus"><span class="dot" style="background:#ef4444"></span>Offline</div>
+  </div>
+  <div class="status-card">
+    <div class="label">Ganache</div>
+    <div class="value" id="ganacheStatus"><span class="dot" style="background:#ef4444"></span>Disconnected</div>
+  </div>
+  <div class="status-card">
+    <div class="label">Block Number</div>
+    <div class="value" id="blockNumber">—</div>
+  </div>
+  <div class="status-card">
+    <div class="label">Registered</div>
+    <div class="value" id="totalRegistered">—</div>
+  </div>
+  <div class="status-card">
+    <div class="label">Applications</div>
+    <div class="value" id="totalApplications">—</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('register', this)">➕ Register Citizen</div>
+    <div class="tab" onclick="switchTab('apply', this)">📄 Apply for Passport</div>
+    <div class="tab" onclick="switchTab('citizens', this)">👥 Citizens</div>
+    <div class="tab" onclick="switchTab('applications', this)">⛓️ Applications</div>
+    <div class="tab" onclick="switchTab('proof', this)">🔍 Verify Identity</div>
+  </div>
+
+  <!-- TAB 1: Register Citizen -->
+  <div class="panel active" id="tab-register">
+    <div class="card">
+      <h2>➕ Register New Citizen on Aadhaar Blockchain</h2>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="e.g. Rajesh Kumar"/>
+      </div>
+      <div class="form-group">
+        <label>Date of Birth (DD-MM-YYYY)</label>
+        <input type="text" id="regDob" placeholder="e.g. 15-06-1985"/>
+      </div>
+      <div class="form-group">
+        <label>Aadhaar ID</label>
+        <input type="text" id="regAadhaar" placeholder="e.g. 1111-2222-3333"/>
+      </div>
+      <button type="button" class="btn" id="regBtn" onclick="registerCitizen()">Register on Blockchain</button>
+      <div class="result" id="regResult">
+        <div class="result-title" id="regTitle"></div>
+        <div id="regDetails"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Apply for Passport -->
+  <div class="panel" id="tab-apply">
+    <div class="card">
+      <h2>📄 Passport Application</h2>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="appName" placeholder="e.g. Rajesh Kumar"/>
+      </div>
+      <div class="form-group">
+        <label>Aadhaar ID</label>
+        <input type="text" id="appAadhaar" placeholder="e.g. 1111-2222-3333"/>
+      </div>
+      <button type="button" class="btn" id="applyBtn" onclick="applyPassport()">Submit Application</button>
+      <div class="result" id="applyResult">
+        <div class="result-title" id="applyTitle"></div>
+        <div id="applyDetails"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Citizens -->
+  <div class="panel" id="tab-citizens">
+    <div class="card">
+      <h2>👥 Registered Citizens (Aadhaar Blockchain)</h2>
+      <div id="citizensList"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: Applications -->
+  <div class="panel" id="tab-applications">
+    <div class="card">
+      <h2>⛓️ Passport Applications (Passport Blockchain)</h2>
+      <div id="applicationsList"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- TAB 5: Verify -->
+  <div class="panel" id="tab-proof">
+    <div class="card">
+      <h2>🔍 Verify Identity Proof</h2>
+      <div class="form-group">
+        <label>Aadhaar ID</label>
+        <input type="text" id="proofAadhaar" placeholder="e.g. 1111-2222-3333"/>
+      </div>
+      <button type="button" class="btn" onclick="verifyIdentity()">Fetch Identity Proof</button>
+      <div class="result" id="proofResult">
+        <div class="result-title">Identity Proof from Aadhaar Blockchain</div>
+        <div id="proofDetails"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://localhost:5000";
+
+ async function loadStatus() {
+    try {
+      const controller = new AbortController();
+      const timeout    = setTimeout(() => controller.abort(), 3000);
+
+      const res  = await fetch(`${API}/health`, {
+        cache  : "no-store",
+        signal : controller.signal
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) throw new Error("API error");
+
+      const data = await res.json();
+
+      // Update block number, registered, applications
+      document.getElementById("blockNumber").textContent       = data.block_number        ?? "—";
+      document.getElementById("totalRegistered").textContent   = data.aadhaar_registered  ?? "—";
+      document.getElementById("totalApplications").textContent = data.passport_applications ?? "—";
+
+      // Show online
+      document.getElementById("middlewareStatus").innerHTML =
+        '<span class="dot" style="background:#22c55e;animation:pulse 1.5s infinite"></span>Online';
+
+      // Check if ganache is connected
+      if (data.ganache === "connected") {
+        document.getElementById("ganacheStatus").innerHTML =
+          '<span class="dot" style="background:#22c55e;animation:pulse 1.5s infinite"></span>Connected';
+      } else {
+        document.getElementById("ganacheStatus").innerHTML =
+          '<span class="dot" style="background:#ef4444"></span>Disconnected';
+      }
+
+    } catch(e) {
+      // Flask is offline or unreachable
+      document.getElementById("blockNumber").textContent       = data.block_number;
+      document.getElementById("totalRegistered").textContent   = data.aadhaar_registered;
+      document.getElementById("totalApplications").textContent = data.passport_applications;
+      document.getElementById("middlewareStatus").innerHTML    =
+        '<span class="dot" style="background:#ef4444"></span>Offline';
+      document.getElementById("ganacheStatus").innerHTML       =
+        '<span class="dot" style="background:#ef4444"></span>Disconnected';
+    }
+  }
+
+  // Auto refresh every 5 seconds
+  loadStatus();
+  setInterval(loadStatus, 5000);
+  async function registerCitizen() {
+    const name      = document.getElementById("regName").value.trim();
+    const dob       = document.getElementById("regDob").value.trim();
+    const aadhaarId = document.getElementById("regAadhaar").value.trim();
+    const resultDiv = document.getElementById("regResult");
+    const titleDiv  = document.getElementById("regTitle");
+    const detailDiv = document.getElementById("regDetails");
+    const btn       = document.getElementById("regBtn");
+
+    if (!name || !dob || !aadhaarId) { alert("Please fill all fields"); return; }
+
+    btn.disabled    = true;
+    btn.textContent = "Registering on blockchain...";
+    resultDiv.className  = "result info show";
+    titleDiv.textContent = "⏳ Sending transaction to Ganache...";
+    detailDiv.innerHTML  = "Please wait...";
+
+    try {
+      const res  = await fetch(`${API}/aadhaar/register`, {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ name, dob, aadhaar_id: aadhaarId })
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        resultDiv.className  = "result error show";
+        titleDiv.textContent = "❌ Registration Failed!";
+        detailDiv.innerHTML  = `<div class="result-row"><span class="key">Error</span><span class="val">${data.error}</span></div>`;
+      } else {
+        resultDiv.className  = "result success show";
+        titleDiv.textContent = "✅ Citizen Registered on Ganache!";
+        detailDiv.innerHTML  = `
+          <div class="result-row"><span class="key">Name</span><span class="val">${data.name}</span></div>
+          <div class="result-row"><span class="key">Aadhaar ID</span><span class="val">${data.aadhaar_id}</span></div>
+          <div class="result-row"><span class="key">Block Number</span><span class="val">#${data.block_number}</span></div>
+          <div class="result-row"><span class="key">Gas Used</span><span class="val">${data.gas_used}</span></div>
+          <div class="result-row"><span class="key">Identity Hash</span><span class="val hash-text">${data.identity_hash}</span></div>
+          <div class="tx-label">Transaction Hash (Ganache)</div>
+          <div class="tx-box">${data.transaction_hash}</div>
+        `;
+        loadStatus();
+      }
+    } catch(e) {
+      resultDiv.className  = "result error show";
+      titleDiv.textContent = "❌ Connection Error";
+      detailDiv.innerHTML  = "Make sure Flask and Ganache are running.";
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = "Register on Blockchain";
+    }
+  }
+
+  async function applyPassport() {
+    const name      = document.getElementById("appName").value.trim();
+    const aadhaarId = document.getElementById("appAadhaar").value.trim();
+    const resultDiv = document.getElementById("applyResult");
+    const titleDiv  = document.getElementById("applyTitle");
+    const detailDiv = document.getElementById("applyDetails");
+    const btn       = document.getElementById("applyBtn");
+
+    if (!name || !aadhaarId) { alert("Please fill all fields"); return; }
+
+    btn.disabled    = true;
+    btn.textContent = "Processing...";
+    resultDiv.className  = "result info show";
+    titleDiv.textContent = "⏳ Verifying identity on Ganache...";
+    detailDiv.innerHTML  = `
+      <div class="result-row"><span class="key">Applicant</span><span class="val">${name}</span></div>
+      <div class="result-row"><span class="key">Status</span><span class="val">Contacting Aadhaar Blockchain...</span></div>
+    `;
+
+    try {
+      const res  = await fetch(`${API}/passport/apply`, {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ name, aadhaar_id: aadhaarId })
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        resultDiv.className  = "result error show";
+        titleDiv.textContent = "❌ Application Failed!";
+        detailDiv.innerHTML  = `<div class="result-row"><span class="key">Error</span><span class="val">${data.error}</span></div>`;
+      } else {
+        const approved = data.status === "APPROVED";
+        resultDiv.className  = `result ${approved ? "success" : "error"} show`;
+        titleDiv.textContent = approved ? "✅ Passport Approved!" : "❌ Passport Rejected!";
+        detailDiv.innerHTML  = `
+          <div class="result-row"><span class="key">Applicant</span><span class="val">${data.applicant}</span></div>
+          <div class="result-row"><span class="key">Aadhaar ID</span><span class="val">${data.aadhaar_id}</span></div>
+          <div class="result-row"><span class="key">Status</span><span class="val">
+            <span class="badge ${approved ? 'approved' : 'rejected'}">${data.status}</span>
+          </span></div>
+          <div class="result-row"><span class="key">Reason</span><span class="val">${data.reason}</span></div>
+          <div class="result-row"><span class="key">Block Number</span><span class="val">#${data.block_number}</span></div>
+          <div class="result-row"><span class="key">Gas Used</span><span class="val">${data.gas_used}</span></div>
+          <div class="result-row"><span class="key">Timestamp</span><span class="val">${data.timestamp}</span></div>
+          <div class="result-row"><span class="key">Identity Hash</span><span class="val hash-text">${data.identity_hash}</span></div>
+          <div class="tx-label">Transaction Hash (Ganache)</div>
+          <div class="tx-box">${data.transaction_hash}</div>
+        `;
+        loadStatus();
+      }
+    } catch(e) {
+      resultDiv.className  = "result error show";
+      titleDiv.textContent = "❌ Connection Error";
+      detailDiv.innerHTML  = "Make sure Flask and Ganache are running.";
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = "Submit Application";
+    }
+  }
+
+  async function loadCitizens() {
+    try {
+      const res  = await fetch(`${API}/aadhaar/citizens`);
+      const data = await res.json();
+      const list = document.getElementById("citizensList");
+      if (data.total === 0) {
+        list.innerHTML = "<div class='loading'>No citizens registered yet.</div>";
+        return;
+      }
+      list.innerHTML = `<p style="color:#94a3b8;margin-bottom:14px;font-size:0.82rem;">Total: ${data.total} citizens on Aadhaar Blockchain</p>`;
+      for (const c of data.citizens) {
+        list.innerHTML += `
+          <div class="citizen-card">
+            <div>
+              <div class="citizen-name">Aadhaar ID: ${c.aadhaar_id}</div>
+              <div class="citizen-meta hash-text">Hash: ${c.identity_hash}</div>
+            </div>
+            <div class="citizen-id">Block ts: ${c.timestamp}</div>
+          </div>`;
+      }
+    } catch(e) {
+      document.getElementById("citizensList").innerHTML = "<div class='loading'>Failed to load.</div>";
+    }
+  }
+
+  async function loadApplications() {
+    try {
+      const res  = await fetch(`${API}/passport/applications`);
+      const data = await res.json();
+      const list = document.getElementById("applicationsList");
+      if (data.total === 0) {
+        list.innerHTML = "<div class='loading'>No applications yet.</div>";
+        return;
+      }
+      list.innerHTML = `<p style="color:#94a3b8;margin-bottom:14px;font-size:0.82rem;">Total: ${data.total} applications on Passport Blockchain</p>`;
+      for (const app of data.applications) {
+        const approved = app.status === "APPROVED";
+        list.innerHTML += `
+          <div class="app-card">
+            <div class="app-title">
+              Application #${app.app_id}
+              <span class="badge ${approved ? 'approved' : 'rejected'}">${app.status}</span>
+            </div>
+            <div class="result-row"><span class="key">Applicant</span><span class="val">${app.applicant_name}</span></div>
+            <div class="result-row"><span class="key">Aadhaar ID</span><span class="val">${app.aadhaar_id}</span></div>
+            <div class="result-row"><span class="key">Timestamp</span><span class="val">${app.timestamp}</span></div>
+          </div>`;
+      }
+    } catch(e) {
+      document.getElementById("applicationsList").innerHTML = "<div class='loading'>Failed to load.</div>";
+    }
+  }
+
+  async function verifyIdentity() {
+    const aadhaarId = document.getElementById("proofAadhaar").value.trim();
+    const resultDiv = document.getElementById("proofResult");
+    const detailDiv = document.getElementById("proofDetails");
+
+    if (!aadhaarId) { alert("Please enter Aadhaar ID"); return; }
+
+    resultDiv.className = "result info show";
+    detailDiv.innerHTML = "Fetching from Aadhaar Blockchain on Ganache...";
+
+    try {
+      const res  = await fetch(`${API}/aadhaar/proof/${aadhaarId}`);
+      const data = await res.json();
+
+      if (data.found) {
+        resultDiv.className = "result success show";
+        detailDiv.innerHTML = `
+          <div class="result-row"><span class="key">Aadhaar ID</span><span class="val">${data.aadhaar_id}</span></div>
+          <div class="result-row"><span class="key">Block Number</span><span class="val">#${data.block_number}</span></div>
+          <div class="result-row"><span class="key">Timestamp</span><span class="val">${data.timestamp}</span></div>
+          <div class="result-row"><span class="key">Identity Hash</span><span class="val hash-text">${data.identity_hash}</span></div>
+          <div class="result-row"><span class="key">Signature</span><span class="val hash-text">${data.signature}</span></div>
+        `;
+      } else {
+        resultDiv.className = "result error show";
+        detailDiv.innerHTML = "❌ Aadhaar ID not found on blockchain.";
+      }
+    } catch(e) {
+      resultDiv.className = "result error show";
+      detailDiv.innerHTML = "Connection error.";
+    }
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll(".tab").forEach(t   => t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    el.classList.add("active");
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    if (tab === "citizens")     loadCitizens();
+    if (tab === "applications") loadApplications();
+  }
+
+  loadStatus();
+  // Auto refresh status every 5 seconds
+  setInterval(loadStatus, 5000);
+</script>
+</body>
+</html>
