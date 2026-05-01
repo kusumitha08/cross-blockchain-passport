@@ -1,2 +1,293 @@
-# cross-blockchain-passport
-Privacy-Preserving Cross-Blockchain and  Passport Authentication using Aadhaar
+# 🔐 Cross-Blockchain Passport Authentication
+
+> Privacy-Preserving Cross-Blockchain Framework for Secure Passport Authentication using Aadhaar Identity Verification
+
+[![Python](https://img.shields.io/badge/Python-3.9-blue.svg)](https://python.org)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.19-orange.svg)](https://soliditylang.org)
+[![Ethereum](https://img.shields.io/badge/Ethereum-Ganache-purple.svg)](https://trufflesuite.com/ganache)
+[![Flask](https://img.shields.io/badge/Flask-2.x-green.svg)](https://flask.palletsprojects.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Problem Statement](#problem-statement)
+- [Proposed Solution](#proposed-solution)
+- [System Architecture](#system-architecture)
+- [Algorithms Used](#algorithms-used)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [How to Run](#how-to-run)
+- [API Endpoints](#api-endpoints)
+- [Security Properties](#security-properties)
+- [Team Members](#team-members)
+
+---
+
+## 📌 Overview
+
+This project implements a **Privacy-Preserving Cross-Blockchain Framework** for secure passport authentication using Aadhaar identity verification. The system uses two independent Ethereum smart contracts deployed on Ganache blockchain — one representing the Aadhaar Blockchain and one representing the Passport Blockchain — connected through a secure Flask middleware layer.
+
+The system verifies citizen identity using **SHA-256 hashing** and **ECDSA digital signatures** without exposing any raw personal data across blockchain boundaries.
+
+---
+
+## ❗ Problem Statement
+
+Traditional passport authentication systems suffer from:
+
+- Centralized databases vulnerable to data breaches
+- Identity theft and unauthorized access
+- Single points of failure
+- No integration with Aadhaar infrastructure
+- Privacy concerns when sharing identity data
+
+---
+
+## ✅ Proposed Solution
+
+A privacy-preserving cross-blockchain authentication framework that:
+
+- Uses **two independent blockchains** — Aadhaar and Passport
+- Stores only **SHA-256 hashed identity** — never raw personal data
+- Uses **ECDSA digital signatures** for cross-chain trust
+- Transfers only **cryptographic proofs** through middleware
+- Eliminates relay bridges reducing attack surface
+- Provides immutable audit trail of all transactions
+
+---
+
+## 🏗️ System Architecture
+
+### Three Main Components
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Aadhaar Blockchain | AadhaarRegistry.sol on Ganache | Stores hashed identity records |
+| Passport Blockchain | PassportRegistry.sol on Ganache | Records passport applications |
+| Middleware Layer | Flask REST API + web3.py | Connects both blockchains |
+
+---
+
+## 🔐 Algorithms Used
+
+### Algorithm 1 — SHA-256 Based Identity Hashing
+Input  : Name + DOB + AadhaarID
+Process: SHA-256 cryptographic hash function
+Output : 256-bit identity hash H
+
+Properties:
+- One-way function — cannot reverse hash
+- Deterministic — same input always gives same output
+- Avalanche effect — one character change changes entire hash
+- Collision resistant — no two inputs produce same hash
+
+### Algorithm 2 — ECDSA Based Cross-Blockchain Verification
+
+**Signing (Aadhaar Side):**
+Input  : Hash H, Private Key PrivA
+Step 1 : Generate random k
+Step 2 : R = k · G (elliptic curve point)
+Step 3 : r = x-coordinate of R
+Step 4 : s = k⁻¹(H + r · PrivA) mod n
+Output : Signature (r, s)
+
+**Verification (Passport Side):**
+Input  : Hash H, Signature (r,s), Public Key PubA
+Step 1 : w  = s⁻¹ mod n
+Step 2 : u1 = H · w mod n
+Step 3 : u2 = r · w mod n
+Step 4 : P  = u1·G + u2·PubA
+Check  : x-coordinate of P = r → ACCEPT
+else → REJECT
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology | Version | Purpose |
+|---|---|---|
+| Python | 3.9 | Primary backend language |
+| SHA-256 (hashlib) | Built-in | Identity hashing |
+| ECDSA (ecdsa library) | Latest | Digital signatures |
+| Solidity | 0.8.19 | Smart contract language |
+| Ganache | 7.9.2 | Local Ethereum blockchain |
+| Truffle | 5.11.5 | Contract deployment framework |
+| web3.py | Latest | Blockchain interaction |
+| Flask | Latest | Middleware REST API |
+| Flask-CORS | Latest | Cross-origin support |
+| HTML/CSS/JavaScript | — | Frontend interface |
+| Node.js | 22.x | Runtime for Truffle and Ganache |
+
+---
+
+## 📁 Project Structure
+## 📁 Project Structure
+
+```
+cross-blockchain-passport/
+|
+|-- contracts/
+|   |-- AadhaarRegistry.sol        (Aadhaar Blockchain smart contract)
+|   |-- PassportRegistry.sol       (Passport Blockchain smart contract)
+|
+|-- migrations/
+|   |-- 2_deploy_contracts.js      (Contract deployment script)
+|
+|-- crypto_core/
+|   |-- crypto_utils.py            (SHA-256 + ECDSA implementation)
+|   |-- keys.py                    (Key management system)
+|   |-- contract_addresses.json    (Deployed contract addresses)
+|
+|-- middleware/
+|   |-- app.py                     (Flask REST API middleware)
+|
+|-- frontend/
+|   |-- index.html                 (Web interface)
+|
+|-- start.py                       (Auto startup script)
+|-- truffle-config.js              (Truffle configuration)
+|-- README.md                      (Project documentation)
+```
+---
+
+## ⚙️ Installation
+
+### Prerequisites
+
+Make sure you have installed:
+- Python 3.9+
+- Node.js 18+
+- VS Code
+
+### Step 1 — Clone Repository
+
+```bash
+git clone https://github.com/kusumitha08/cross-blockchain-passport.git
+cd cross-blockchain-passport
+```
+
+### Step 2 — Install Python Dependencies
+
+```bash
+pip install web3 flask ecdsa flask-cors requests
+```
+
+### Step 3 — Install Node Dependencies
+
+```bash
+npm install -g ganache
+npm install -g truffle
+```
+
+### Step 4 — Verify Installation
+
+```bash
+ganache --version
+truffle version
+python -c "import web3, flask, ecdsa; print('All good!')"
+```
+
+---
+
+## ▶️ How to Run
+
+### Step 1 — Start Ganache (Terminal 1)
+
+```bash
+ganache --port 8545 --accounts 10 --deterministic
+```
+
+Wait until you see:
+✅ Connected to Ganache blockchain!
+Running on http://127.0.0.1:5000
+
+### Step 3 — Run Startup Script (Terminal 3)
+
+```bash
+python start.py
+```
+
+This automatically:
+- Deploys both smart contracts to Ganache
+- Updates contract addresses
+- Registers all citizens on Aadhaar Blockchain
+
+### Step 4 — Restart Flask After start.py Asks
+
+Stop Flask with Ctrl+C and run again:
+```bash
+python app.py
+```
+
+Then press Enter in Terminal 3 to complete citizen registration.
+
+### Step 5 — Open Frontend
+
+Open `frontend/index.html` in VS Code and click **Go Live** at bottom right.
+
+---
+
+## 🌐 API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Check system status |
+| POST | `/aadhaar/register` | Register citizen on Aadhaar Blockchain |
+| GET | `/aadhaar/citizens` | View all registered citizens |
+| GET | `/aadhaar/proof/<aadhaar_id>` | Get identity proof from blockchain |
+| POST | `/passport/apply` | Apply for passport |
+| GET | `/passport/applications` | View all passport applications |
+| GET | `/passport/validate` | Validate blockchain stats |
+
+### Example API Calls
+
+**Register Citizen:**
+```bash
+POST http://localhost:5000/aadhaar/register
+{
+    "name"      : "Rajesh Kumar",
+    "dob"       : "15-06-1985",
+    "aadhaar_id": "1111-2222-3333"
+}
+```
+
+**Apply for Passport:**
+```bash
+POST http://localhost:5000/passport/apply
+{
+    "name"      : "Rajesh Kumar",
+    "aadhaar_id": "1111-2222-3333"
+}
+```
+
+**Get Identity Proof:**
+```bash
+GET http://localhost:5000/aadhaar/proof/1111-2222-3333
+```
+
+---
+
+## 🔒 Security Properties
+
+| Property | Implementation |
+|---|---|
+| **Privacy** | Raw personal data never leaves Aadhaar Blockchain |
+| **Integrity** | SHA-256 ensures any tampering changes the hash |
+| **Authentication** | ECDSA signature proves identity from Aadhaar authority |
+| **Immutability** | All records permanently stored on blockchain |
+| **Non-repudiation** | Aadhaar authority cannot deny signing identity |
+| **Cross-chain trust** | Passport chain verifies locally using public key |
+
+---
+
+## 🔄 Cross-Blockchain Verification Flow
+-Step 1 → Citizen submits passport application
+-Step 2 → Middleware contacts Aadhaar Blockchain
+-Step 3 → Aadhaar Blockchain returns Hash + Signature only
+-Step 4 → Middleware passes proof to Passport Blockchain
+-Step 5 → Passport Blockchain verifies ECDSA signature
+-Step 6 → APPROVED or REJECTED recorded on Passport Blockchain
