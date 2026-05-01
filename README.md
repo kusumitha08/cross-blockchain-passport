@@ -59,6 +59,7 @@ A privacy-preserving cross-blockchain authentication framework that:
 ---
 
 ## 🏗️ System Architecture
+ <img width="2962" height="2893" alt="archetecture1" src="https://github.com/user-attachments/assets/e941a527-7bf4-4eb9-9d59-25e8ba7a7872" />
 
 ### Three Main Components
 
