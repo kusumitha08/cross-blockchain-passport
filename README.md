@@ -314,21 +314,6 @@ GET http://localhost:5000/aadhaar/proof/1111-2222-3333
 
 ---
 
-## 👥 Team Members
-
-| Name | Role |
-|---|---|
-| Kusumitha | Developer |
-| Hamsa | Developer |
-| Rishitha | Developer |
-| Vidya | Developer |
-
- **Guide:** Dr. Pradeep R
- **Institution:** Siddaganga Institute of Technology, Tumkuru
- **Department:** Information Science and Engineering
-
----
-
 ## 📚 References
 
 1. Cheng et al. — Secure Cross-Blockchain Interaction Framework — IEEE Access 2024
