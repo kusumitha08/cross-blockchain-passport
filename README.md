@@ -338,8 +338,3 @@ GET http://localhost:5000/aadhaar/proof/1111-2222-3333
 5. UIDAI — Aadhaar Authentication Framework — Government of India 2022
 
 ---
-
-## 📄 License
-
-This project is for academic research purposes only.
-Siddaganga Institute of Technology — 2026
