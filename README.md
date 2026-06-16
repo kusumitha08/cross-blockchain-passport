@@ -88,19 +88,19 @@ Properties:
 
 **Signing (Aadhaar Side):**
 Input  : Hash H, Private Key PrivA
-Step 1 : Generate random k
-Step 2 : R = k · G (elliptic curve point)
-Step 3 : r = x-coordinate of R
-Step 4 : s = k⁻¹(H + r · PrivA) mod n
-Output : Signature (r, s)
+-Step 1 : Generate random k
+-Step 2 : R = k · G (elliptic curve point)
+-Step 3 : r = x-coordinate of R
+-Step 4 : s = k⁻¹(H + r · PrivA) mod n
+-Output : Signature (r, s)
 
 **Verification (Passport Side):**
 Input  : Hash H, Signature (r,s), Public Key PubA
-Step 1 : w  = s⁻¹ mod n
-Step 2 : u1 = H · w mod n
-Step 3 : u2 = r · w mod n
-Step 4 : P  = u1·G + u2·PubA
-Check  : x-coordinate of P = r → ACCEPT
+-Step 1 : w  = s⁻¹ mod n
+-Step 2 : u1 = H · w mod n
+-Step 3 : u2 = r · w mod n
+-Step 4 : P  = u1·G + u2·PubA
+-Check  : x-coordinate of P = r → ACCEPT
 else → REJECT
 
 ---
@@ -123,7 +123,6 @@ else → REJECT
 
 ---
 
-## 📁 Project Structure
 ## 📁 Project Structure
 
 ```
